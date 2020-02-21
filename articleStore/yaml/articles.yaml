@@ -1,0 +1,153 @@
+openapi: 3.0.0
+
+info:
+  version: '1.0.0'
+  title: 'Article Store API specification'
+  description: 'This describes the Endpoints served by this service'
+  
+servers:
+  - url: '{apiRoot}/'
+    variables:
+      apiRoot:
+        default: https://example.com
+        description: .  
+        
+paths: 
+  /articles:
+    post:
+      summary: Create an article
+      operationId: createArticle
+      tags:
+        - articles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Article'
+        required: true
+      responses:
+        "201":
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      
+  /articles/{id}:
+    get:
+      summary: Info for a specific article
+      operationId: getArticleById
+      tags:
+        - articles
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the article to retrieve
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: '#/components/schemas/Articles'
+        default:
+          description: Unexpected error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      
+  /tags/{tagName}/{date}:
+    get:
+      summary: List of articles with tag name on given date
+      operationId: getArticlesByTagAndDate
+      tags:
+        - articles
+      parameters:
+        - name: tagName
+          in: path
+          required: true
+          description: The tag on the article to retrieve
+          schema:
+            type: string
+        - name: date
+          in: path
+          required: true
+          description: The date on the article to retrieve
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: '#/components/schemas/ArticlesByTagAndDate'
+        default:
+          description: Unexpected error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+components: 
+  schemas:
+    ArticlesByTagAndDate:
+      type: object
+      properties:
+        tag:
+          description: "allowed date format: YYYY-MM-DD"
+          type: string
+        count:
+          description: "The number of tags for the tag for given day"
+          type: integer
+        articles:
+          description: "list of ids for the last 10 articles entered for that day"
+          type: array
+          items:
+            type: string
+          minItems: 1
+        related_tags:
+          description: "list of tags that are on the articles that the current tag is on for the same day"
+          type: array
+          items:
+            type: string
+          minItems: 1
+    Articles:
+      type: array
+      items:
+        type: string
+      minItems: 1
+    Article:
+      type: object
+      required:
+      - id
+      - title
+      - date
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        date:
+          description: "allowed date format: YYYY-MM-DD"
+          type: string
+        body:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          minItems: 1
+    Error:
+      type: "object"
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+          
+          
+          
+          
