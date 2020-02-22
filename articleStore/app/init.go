@@ -4,7 +4,7 @@ import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	log "github.com/sirupsen/logrus"
-	db "goprojects/articleStore/dbwrapper"
+	db "goprojects/articleStore/server/handler"
 	"runtime"
 	"strings"
 )

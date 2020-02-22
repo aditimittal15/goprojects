@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	db "goprojects/articleStore/dbwrapper"
 	model "goprojects/articleStore/models"
+	//db "goprojects/articleStore/server/handler"
 	"net/http"
 )
 
 func validateArticle(article model.Article) error {
-
+	//TODO
 	return nil
 }
 
@@ -65,7 +65,7 @@ func CreateArticleAPIServiceLogic(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	errMsg = db.Insert(article)
+	errMsg = Insert(article)
 	if errMsg != nil {
 		err := fmt.Errorf("Db Insert operation error %+v", errMsg)
 		errObj.Code = http.StatusInternalServerError

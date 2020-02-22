@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	db "goprojects/articleStore/dbwrapper"
 	model "goprojects/articleStore/models"
+	//	db "goprojects/articleStore/server/handler"
 	"net/http"
 )
 
@@ -32,7 +32,7 @@ func GetArticleByIDAPIServiceLogic(resp http.ResponseWriter, req *http.Request) 
 	//Get article from DB
 
 	whereClause := fmt.Sprintf("id = %v", ID)
-	articles, errMsg := db.GetArticle(whereClause)
+	articles, errMsg := GetArticle(whereClause)
 	if errMsg != nil {
 
 		err := fmt.Errorf("Db Insert operation error %+v ", errMsg)
