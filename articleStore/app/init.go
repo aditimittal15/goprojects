@@ -29,5 +29,6 @@ func formatFilePath(path string) string {
 func init() {
 
 	initLog()
+	db.CreateDbConnection()
 	db.CreateDBSchema()
 }
