@@ -11,16 +11,21 @@ import (
 )
 
 const (
-	databaseName              = "sqlite3"
-	databaseFileName          = "./articles.db"
-	insertArticleString       = "INSERT INTO articles (Title, Body,Date,Created) VALUES (?,?,?,?)"
-	selectArticleString       = "SELECT id,Title,Body,Date FROM articles "
-	selectTagsString          = "SELECT Tag FROM tags "
-	insertTagString           = "INSERT INTO tags (ArticleId,Tag) VALUES (?,?)"
-	dateFormat                = "2006-01-02"
-	createdDateFormat         = "2014-09-12T11:45:26.371Z"
+	databaseName     = "sqlite3"
+	databaseFileName = "./articles.db"
+
 	createArticlesTableString = "CREATE TABLE IF NOT EXISTS articles (id INTEGER PRIMARY KEY, Title TEXT, Body TEXT,Date TIMESTAMP, Created TIMESTAMP)"
 	createTagsTableString     = "CREATE TABLE IF NOT EXISTS tags (id INTEGER PRIMARY KEY, ArticleId INTEGER, Tag Text,FOREIGN KEY (ArticleId) REFERENCES articles(id))"
+	insertArticleString       = "INSERT INTO articles (Title, Body,Date,Created) VALUES (?,?,?,?)"
+	insertTagString           = "INSERT INTO tags (ArticleId,Tag) VALUES (?,?)"
+	selectArticleString       = "SELECT id,Title,Body,Date FROM articles "
+	selectTagsString          = "SELECT Tag FROM tags "
+	articlesByDateQuery       = "select id from articles where Date = \"%s\" ORDER BY id DESC LIMIT %d"
+	tagCountForDateQuery      = "select count(*) from articles inner join tags on articles.id = tags.ArticleId where Date = \"%s\" and Tag = \"%s\";"
+	relatedTagsForDateQuery   = "select DISTINCT Tag from tags where ArticleId IN (select articles.id from articles inner join tags on articles.id = tags.ArticleId where Date = \"%s\" and Tag = \"%s\") and Tag != \"%s\""
+
+	dateFormat        = "2006-01-02"
+	createdDateFormat = "2014-09-12T11:45:26.371Z"
 )
 
 var Conn *sql.DB
@@ -49,10 +54,6 @@ func CreateDBSchema() {
 	checkPanicError(err)
 	_, err = statement.Exec()
 	checkPanicError(err)
-	//var datetime = time.Now().UTC()
-	/*statement, _ = Conn.Prepare("INSERT INTO articles (Title, Body,Date) VALUES (?,?,?)")
-	  statement.Exec("hello", "this is me",datetime.Format("2006-01-02"))
-	  rows, _ := Conn.Query("SELECT * FROM articles")*/
 }
 func InsertTag(id int64, tag string) error {
 	statement, err := Conn.Prepare(insertTagString)
@@ -121,19 +122,46 @@ func GetArticle(id string) (model.Article, error) {
 
 	return article, err
 }
-func getArticlesByDate(date string, limit int) []string {
+func getArticlesByDate(date string, limit int) ([]string, error) {
 	var result []string
-	stmtStr := fmt.Sprintf("select id from articles where Date = %s ORDER BY id DESC LIMIT %d", date, limit)
-	fmt.Println(stmtStr)
-	return result
-
+	stmtStr := fmt.Sprintf(articlesByDateQuery, date, limit)
+	log.Debug("DB Query executed: ", stmtStr)
+	rows, err := Conn.Query(stmtStr)
+	if err != nil {
+		return result, err
+	}
+	for rows.Next() {
+		var id int
+		rows.Scan(&id)
+		result = append(result, strconv.Itoa(id))
+	}
+	return result, err
 }
-func getTagCountForDate(date string, tag string) int32 {
+func getTagCountForDate(date string, tag string) (int32, error) {
 	var result int32
-	return result
+	stmtStr := fmt.Sprintf(tagCountForDateQuery, date, tag)
+	log.Debug("DB Query executed: ", stmtStr)
+	rows, err := Conn.Query(stmtStr)
+	if err != nil {
+		return result, err
+	}
+	for rows.Next() {
+		rows.Scan(&result)
+	}
+	return result, err
 }
-func getRelatedTagsforDate(date string, tag string) []string {
-
+func getRelatedTagsforDate(date string, tag string) ([]string, error) {
 	var result []string
-	return result
+	stmtStr := fmt.Sprintf(relatedTagsForDateQuery, date, tag, tag)
+	log.Debug("DB Query executed: ", stmtStr)
+	rows, err := Conn.Query(stmtStr)
+	if err != nil {
+		return result, err
+	}
+	for rows.Next() {
+		var tag string
+		rows.Scan(&tag)
+		result = append(result, tag)
+	}
+	return result, err
 }

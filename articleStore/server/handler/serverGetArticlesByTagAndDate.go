@@ -2,12 +2,11 @@ package handler
 
 import (
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
-	"net/http"
-	//"fmt"
+	"fmt"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	model "goprojects/articleStore/models"
-	//	db "goprojects/articleStore/server/handler"
+	"net/http"
 )
 
 const MAX_ARTICLES_FOR_DAY = 10
@@ -49,14 +48,24 @@ func GetArticlesByTagAndDateAPIServiceLogic(resp http.ResponseWriter, req *http.
 	}
 
 	result.Tag = tagName
-	result.Articles = getArticlesByDate(dateStr, MAX_ARTICLES_FOR_DAY)
-	result.Count = getTagCountForDate(dateStr, tagName)
-	result.RelatedTags = getRelatedTagsforDate(dateStr, tagName)
+	articles, err := getArticlesByDate(dateStr, MAX_ARTICLES_FOR_DAY)
+	if err != nil {
+		errObj.Code = http.StatusInternalServerError
+		errObj.Message = fmt.Sprintf("Error in fetching articles for given date:%+v", err)
+		writeErrorResp(resp, errObj)
+		return
+
+	}
+	result.Articles = articles
+	count, _ := getTagCountForDate(dateStr, tagName)
+	result.Count = count
+	relatedTags, _ := getRelatedTagsforDate(dateStr, tagName)
+	result.RelatedTags = relatedTags
 
 	resp.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	resp.WriteHeader(http.StatusOK)
 	js, _ := json.Marshal(result)
-	_, err := resp.Write(js)
+	_, err = resp.Write(js)
 	if err != nil {
 		log.Error("failed to write success response as json ", funcName)
 		http.Error(resp, "failed to write response as json", http.StatusInternalServerError)

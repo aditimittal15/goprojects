@@ -30,8 +30,6 @@ func GetArticleByIDAPIServiceLogic(resp http.ResponseWriter, req *http.Request) 
 	ID := vars["id"]
 
 	//Get article from DB
-
-	//whereClause := fmt.Sprintf("id = %v", ID)
 	article, errMsg := GetArticle(ID)
 	if errMsg != nil {
 

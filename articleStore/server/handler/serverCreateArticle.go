@@ -10,6 +10,13 @@ import (
 	"net/http"
 )
 
+// validateArticle ...
+// This functions is used to validate Article object received
+//
+// Input:
+//  - article: Obj to be validated
+// Return:
+//  - err: returns err with respect to validation failure
 func validateArticle(article model.Article) error {
 	var err error
 	if article.Title == "" {
@@ -20,19 +27,6 @@ func validateArticle(article model.Article) error {
 
 	}
 	return err
-}
-
-func writeErrorResp(resp http.ResponseWriter, errObj model.Error) {
-	log.Error(errObj.Message)
-	resp.WriteHeader(int(errObj.Code))
-	js, _ := json.Marshal(errObj)
-	_, err := resp.Write(js)
-	if err != nil {
-		log.Error("failed to write error response as json")
-		http.Error(resp, "failed to write response as json", http.StatusInternalServerError)
-		return
-	}
-	return
 }
 
 // CreateArticleAPIServiceLogic ...
