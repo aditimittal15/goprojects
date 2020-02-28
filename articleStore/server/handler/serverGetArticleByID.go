@@ -31,19 +31,25 @@ func GetArticleByIDAPIServiceLogic(resp http.ResponseWriter, req *http.Request) 
 
 	//Get article from DB
 
-	whereClause := fmt.Sprintf("id = %v", ID)
-	articles, errMsg := GetArticle(whereClause)
+	//whereClause := fmt.Sprintf("id = %v", ID)
+	article, errMsg := GetArticle(ID)
 	if errMsg != nil {
 
-		err := fmt.Errorf("Db Insert operation error %+v ", errMsg)
+		err := fmt.Errorf("Db Get operation error %+v ", errMsg)
 		errObj.Code = http.StatusInternalServerError
 		errObj.Message = err.Error()
 		writeErrorResp(resp, errObj)
 		return
 	}
+	if article.ID == "" {
+		errObj.Code = http.StatusNotFound
+		errObj.Message = "Record doesn't exist"
+		writeErrorResp(resp, errObj)
+		return
+	}
 
 	resp.WriteHeader(http.StatusOK)
-	js, _ := json.Marshal(articles)
+	js, _ := json.Marshal(article)
 	_, err := resp.Write(js)
 	if err != nil {
 		log.Error("failed to write success response as json ", funcName)

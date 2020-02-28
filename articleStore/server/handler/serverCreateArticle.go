@@ -5,13 +5,21 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	model "goprojects/articleStore/models"
+	"strconv"
 	//db "goprojects/articleStore/server/handler"
 	"net/http"
 )
 
 func validateArticle(article model.Article) error {
-	//TODO
-	return nil
+	var err error
+	if article.Title == "" {
+		err = fmt.Errorf("Title is empty, provide title for article being stored")
+	}
+	if article.Date == "" {
+		err = fmt.Errorf("Date is empty, provide Date for article being stored")
+
+	}
+	return err
 }
 
 func writeErrorResp(resp http.ResponseWriter, errObj model.Error) {
@@ -65,13 +73,24 @@ func CreateArticleAPIServiceLogic(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	errMsg = Insert(article)
+	id, errMsg := InsertArticle(article)
 	if errMsg != nil {
 		err := fmt.Errorf("Db Insert operation error %+v", errMsg)
 		errObj.Code = http.StatusInternalServerError
 		errObj.Message = err.Error()
 		writeErrorResp(resp, errObj)
 		return
+	}
+	article.ID = strconv.Itoa(int(id))
+	for _, tag := range article.Tags {
+		errMsg := InsertTag(id, tag)
+		if errMsg != nil {
+			err := fmt.Errorf("Db Insert operation error %+v", errMsg)
+			errObj.Code = http.StatusInternalServerError
+			errObj.Message = err.Error()
+			writeErrorResp(resp, errObj)
+			return
+		}
 	}
 	log.Info("Article posted: ", article)
 

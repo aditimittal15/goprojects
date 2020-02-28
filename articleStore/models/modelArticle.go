@@ -7,5 +7,5 @@ type Article struct {
 	ID   string `json:"id,omitempty"`
 	//minItems=1,
 	Tags  []string `json:"tags"`
-	Title string   `json:"title,omitempty"`
+	Title string   `json:"title"`
 }
