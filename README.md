@@ -1,2 +1,3 @@
 # goprojects
-Repository to store all goprojects
+Repository containing articleStore server application
+For details on server application,please refer articleStore/README.md 
