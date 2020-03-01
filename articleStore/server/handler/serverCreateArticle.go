@@ -29,10 +29,10 @@ func validateArticle(article model.Article) error {
 		return err
 	}
 	_, err = time.Parse(dateFormat, article.Date)
-        if err != nil {
-		err = fmt.Errorf("Date %s is not as per allowed format %s",article.Date,dateFormat)
+	if err != nil {
+		err = fmt.Errorf("Date %s is not as per allowed format %s", article.Date, dateFormat)
 		return err
-        }
+	}
 
 	return err
 }
@@ -95,8 +95,8 @@ func CreateArticleAPIServiceLogic(resp http.ResponseWriter, req *http.Request) {
 		}
 	}
 	log.Info("Article posted: ", article)
-	js, _ := json.Marshal(article)
-	resp.Write(js)
 	resp.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	resp.WriteHeader(http.StatusOK)
+	js, _ := json.Marshal(article)
+	resp.Write(js)
 }

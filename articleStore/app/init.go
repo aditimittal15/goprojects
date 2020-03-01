@@ -12,7 +12,7 @@ func initLog() {
 		FullTimestamp:          true,
 		DisableLevelTruncation: true, // log level field configuration
 	}
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.WarnLevel)
 	log.SetFormatter(formatter)
 }
 

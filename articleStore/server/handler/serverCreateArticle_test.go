@@ -1,13 +1,13 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	model "goprojects/articleStore/models"
 	"net/http"
-	"testing"
-	"encoding/json"
 	"net/http/httptest"
-	"bytes"
+	"testing"
 )
 
 func initLog() {
@@ -80,24 +80,24 @@ func TestCreateArticleAPIServiceLogic(t *testing.T) {
 	jsonData1, _ := json.Marshal(article)
 	jsonData2, _ := json.Marshal("hello")
 	article3 := model.Article{
-                Body:  "This is the body",
-                Date:  "2020-02-28",
-                ID:    "1",
-                Tags:  []string{"health", "potato"},
-        }
+		Body: "This is the body",
+		Date: "2020-02-28",
+		ID:   "1",
+		Tags: []string{"health", "potato"},
+	}
 	jsonData3, _ := json.Marshal(article3)
 	article4 := model.Article{
-                Body:  "This is the body",
-                ID:    "1",
+		Body:  "This is the body",
+		ID:    "1",
 		Title: "Potato",
-        }
+	}
 	jsonData4, _ := json.Marshal(article4)
 	article5 := model.Article{
-                Body:  "This is the body",
-                Date:  "02-28-2020",
-                ID:    "1",
+		Body:  "This is the body",
+		Date:  "02-28-2020",
+		ID:    "1",
 		Title: "Potato",
-        }
+	}
 	jsonData5, _ := json.Marshal(article5)
 	req, _ := http.
 		NewRequest("POST", "/articles", bytes.NewBuffer(jsonData))

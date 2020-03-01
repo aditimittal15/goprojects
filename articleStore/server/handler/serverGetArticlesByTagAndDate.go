@@ -12,22 +12,32 @@ import (
 
 const (
 	MAX_ARTICLES_FOR_DAY = 10
-	DATE_STR_LENGTH = 8
+	DATE_STR_LENGTH      = 8
+	MONTH_START_INDEX    = 4
+	DAY_START_INDEX      = 6
 )
 
-
-func convertDateString(dateStr string)(string,bool){
+//convertDateString
+//This function validates and convert the date string in request URL path to
+//required date format YYYY-MM-DD
+//Input:
+// - dateStr : date string received from URL path
+//Return:
+// - date: required formatted date
+// - error: error in case date str is not valid
+func convertDateString(dateStr string) (string, bool) {
 	var date string
-	if len(dateStr) != DATE_STR_LENGTH{
-		return date,false
+	if len(dateStr) != DATE_STR_LENGTH {
+		return date, false
 	}
-	_,err := strconv.Atoi(dateStr)
+	_, err := strconv.Atoi(dateStr)
 	if err != nil {
-		return date,false
+		return date, false
 	}
-	date = dateStr[:4]+"-"+dateStr[4:6]+"-"+dateStr[6:]
-	return date,true
+	date = dateStr[:MONTH_START_INDEX] + "-" + dateStr[MONTH_START_INDEX:DAY_START_INDEX] + "-" + dateStr[DAY_START_INDEX:]
+	return date, true
 }
+
 // GetArticlesByTagAndDateAPIServiceLogic ...
 // This functions is used for main API handling for GetArticlesByTagAndDateAPIServiceLogic
 //
@@ -63,11 +73,11 @@ func GetArticlesByTagAndDateAPIServiceLogic(resp http.ResponseWriter, req *http.
 		writeErrorResp(resp, errObj)
 		return
 	}
-	
-	date, valid:= convertDateString(dateStr)
-	if valid != true{
+
+	date, valid := convertDateString(dateStr)
+	if valid != true {
 		errObj.Code = http.StatusBadRequest
-		errObj.Message = fmt.Sprintf("dateStr %s not in required format YYYYMMDD",dateStr)
+		errObj.Message = fmt.Sprintf("dateStr %s not in required format YYYYMMDD", dateStr)
 		writeErrorResp(resp, errObj)
 		return
 	}
