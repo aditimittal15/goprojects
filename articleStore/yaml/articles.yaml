@@ -26,7 +26,7 @@ paths:
               $ref: '#/components/schemas/Article'
         required: true
       responses:
-        "201":
+        "200":
           description: Null response
         default:
           description: unexpected error

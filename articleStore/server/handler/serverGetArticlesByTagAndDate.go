@@ -7,10 +7,27 @@ import (
 	log "github.com/sirupsen/logrus"
 	model "goprojects/articleStore/models"
 	"net/http"
+	"strconv"
 )
 
-const MAX_ARTICLES_FOR_DAY = 10
+const (
+	MAX_ARTICLES_FOR_DAY = 10
+	DATE_STR_LENGTH = 8
+)
 
+
+func convertDateString(dateStr string)(string,bool){
+	var date string
+	if len(dateStr) != DATE_STR_LENGTH{
+		return date,false
+	}
+	_,err := strconv.Atoi(dateStr)
+	if err != nil {
+		return date,false
+	}
+	date = dateStr[:4]+"-"+dateStr[4:6]+"-"+dateStr[6:]
+	return date,true
+}
 // GetArticlesByTagAndDateAPIServiceLogic ...
 // This functions is used for main API handling for GetArticlesByTagAndDateAPIServiceLogic
 //
@@ -46,9 +63,17 @@ func GetArticlesByTagAndDateAPIServiceLogic(resp http.ResponseWriter, req *http.
 		writeErrorResp(resp, errObj)
 		return
 	}
+	
+	date, valid:= convertDateString(dateStr)
+	if valid != true{
+		errObj.Code = http.StatusBadRequest
+		errObj.Message = fmt.Sprintf("dateStr %s not in required format YYYYMMDD",dateStr)
+		writeErrorResp(resp, errObj)
+		return
+	}
 
 	result.Tag = tagName
-	articles, err := getArticlesByDate(dateStr, MAX_ARTICLES_FOR_DAY)
+	articles, err := getArticlesByDate(date, MAX_ARTICLES_FOR_DAY)
 	if err != nil {
 		errObj.Code = http.StatusInternalServerError
 		errObj.Message = fmt.Sprintf("Error in fetching articles for given date:%+v", err)
@@ -57,9 +82,9 @@ func GetArticlesByTagAndDateAPIServiceLogic(resp http.ResponseWriter, req *http.
 
 	}
 	result.Articles = articles
-	count, _ := getTagCountForDate(dateStr, tagName)
+	count, _ := getTagCountForDate(date, tagName)
 	result.Count = count
-	relatedTags, _ := getRelatedTagsforDate(dateStr, tagName)
+	relatedTags, _ := getRelatedTagsforDate(date, tagName)
 	result.RelatedTags = relatedTags
 
 	resp.Header().Set("Content-Type", "application/json; charset=UTF-8")

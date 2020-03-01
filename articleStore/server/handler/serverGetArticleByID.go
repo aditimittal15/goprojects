@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"strconv"
 	"fmt"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -10,6 +11,19 @@ import (
 	"net/http"
 )
 
+
+func validateArticleId(id string)error{
+	if id == ""{
+		err := fmt.Errorf("no Id received in request")
+		return err
+	}
+	_,err := strconv.Atoi(id)
+	if err != nil{
+		err := fmt.Errorf("Id parsing error: %+v",err)
+		return err
+	}
+	return nil
+}
 // GetArticleByIDAPIServiceLogic ...
 // This functions is used for main API handling for GetArticleByIDAPIServiceLogic
 //
@@ -28,7 +42,15 @@ func GetArticleByIDAPIServiceLogic(resp http.ResponseWriter, req *http.Request) 
 	//extract path variables
 	vars := mux.Vars(req)
 	ID := vars["id"]
-
+	
+	errMsg := validateArticleId(ID)
+	if errMsg != nil{
+		err := fmt.Errorf("Db Get operation error %+v ", errMsg)
+		errObj.Code = http.StatusBadRequest
+		errObj.Message = err.Error()
+		writeErrorResp(resp, errObj)
+		return
+	}
 	//Get article from DB
 	article, errMsg := GetArticle(ID)
 	if errMsg != nil {

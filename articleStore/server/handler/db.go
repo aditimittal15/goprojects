@@ -68,10 +68,7 @@ func InsertTag(id int64, tag string) error {
 func InsertArticle(article model.Article) (int64, error) {
 	var createdTime = time.Now().UTC()
 	var id int64
-	date, err := time.Parse(dateFormat, article.Date)
-	if err != nil {
-		return id, err
-	}
+	date, _ := time.Parse(dateFormat, article.Date)
 	statement, err := Conn.Prepare(insertArticleString)
 	if err != nil {
 		return id, err
